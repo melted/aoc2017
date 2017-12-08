@@ -25,7 +25,6 @@ struct Instr {
 }
 
 fn parse_instruction(s : &str) -> Option<Instr> {
-    println!("{}", s);
     let mut iter = s.split_whitespace();
     let reg = iter.next().unwrap().to_string();
     let op = match iter.next().unwrap() {
@@ -59,11 +58,36 @@ fn load_data() -> Vec<Instr> {
     out
 }
 
-fn execute(inst : Instr, state : &mut HashMap<String, i32>) {
-    
+fn execute(instr : &Instr, state : &mut HashMap<String, i32>, maxes : &mut Vec<i32>) {
+   let cond_result = {
+        let cr_val = state.get(&instr.creg).unwrap_or(&0);
+        match instr.cond {
+            Cond::Equ => *cr_val == instr.cval,
+            Cond::NEq => *cr_val != instr.cval,
+            Cond::Gt => *cr_val > instr.cval,
+            Cond::GtEq => *cr_val >= instr.cval,
+            Cond::Lt => *cr_val < instr.cval,
+            Cond::LtEq => *cr_val <= instr.cval
+        }
+   };
+   if cond_result {
+       let entry = state.entry(instr.reg.clone()).or_insert(0);
+       match instr.op {
+           Op::Inc => *entry += instr.val,
+           Op::Dec => *entry -= instr.val
+       }
+   }
+   maxes.push(*state.values().max().unwrap_or(&0));
 }
 
 fn main() {
     let instrs = load_data();
-    println!("{:?}", instrs);
+    let mut state = HashMap::new();
+    let mut maxes = Vec::new();
+    for i in instrs.iter() {
+        execute(i, &mut state, &mut maxes);
+    }
+    let m = state.values().max().unwrap();
+    let m2 = maxes.iter().max().unwrap();
+    println!("{} {}", m, m2);
 }
