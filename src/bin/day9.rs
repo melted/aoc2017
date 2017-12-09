@@ -29,6 +29,10 @@ fn parse_group(t : &mut Chars, level : i32) -> (i32, i32) {
                      garbage += g },
             '<' => garbage += parse_garbage(t),
             '}' => return (score + level, garbage),
+            c => println!("Bad char {}", c)
+        }
+        match t.next().unwrap() {
+            '}' => return (score + level, garbage),
             ',' => {},
             c => println!("Bad char {}", c)
         }
