@@ -45,7 +45,7 @@ fn parse_instruction(s : &str) -> Option<Instr> {
         _ => panic!("boom")
     };
     let cval = iter.next().unwrap().parse().unwrap();
-    Some(Instr { reg: reg, op: op, val: val, creg: creg, cond: cond, cval: cval })
+    Some(Instr { reg, op, val, creg, cond, cval })
 }
 
 fn load_data() -> Vec<Instr> {
