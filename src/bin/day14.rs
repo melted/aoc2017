@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 fn one_round<T : Copy>(v : &Vec<T>, pos : i32, size : i32) -> Vec<T> {
     let mut out = v.clone();
     let end = pos + size;
@@ -8,7 +10,7 @@ fn one_round<T : Copy>(v : &Vec<T>, pos : i32, size : i32) -> Vec<T> {
     out
 }
 
-fn knot_hash(input : String) -> u32 {
+fn knot_hash(input : &str) ->Vec<u8> {
     let mut skip_size = 0;
     let mut pos = 0;
     let mut data : Vec<u8> = vec![0; 256];
@@ -28,20 +30,71 @@ fn knot_hash(input : String) -> u32 {
             pos %= len;
         }
     }
-    let mut out = 0;
+    let mut out = Vec::new();
     for sub in data.chunks(16) {
         let res = sub.iter().fold(0, |a, &b| a^b);
-        out += res.count_ones();
+        out.push(res);
     }
     out
 }
 
-fn main() {
-    let key = "ugkiagan";
-    let mut count = 0;
-    for i in 0..128 {
-        let rowkey = format!("{}-{}", key, i);
-        count += knot_hash(rowkey);
+fn get_map(key : &str) -> HashSet<(i32, i32)> {
+    let mut out = HashSet::new();
+    for y in 0..128 {
+        let rowkey = format!("{}-{}", key, y);
+        let v = knot_hash(&rowkey);
+        for i in 0..16 {
+            let b = v[i as usize];
+            for j in 0..8 {
+                if b & (1 << j) != 0 {
+                    let x = (7 - j) + 8*i;
+                    out.insert((x, y));
+                } 
+            }
+        }
     }
-    println!("{}", count);
+    out
+}
+
+fn neighbours(p : &(i32, i32)) -> Vec<(i32, i32)> {
+    let mut out = Vec::new();
+    out.push((p.0 - 1, p.1));
+    out.push((p.0, p.1 - 1));
+    out.push((p.0 + 1, p.1));
+    out.push((p.0, p.1 + 1));
+    out
+}
+
+
+fn count_regions(data : &HashSet<(i32, i32)>) -> i32 {
+    let mut unexplored = data.clone();
+    let mut count = 0;
+    while !unexplored.is_empty() {
+        let n = *unexplored.iter().next().unwrap();
+        let mut frontier = HashSet::new();
+        frontier.insert(n);
+        while !frontier.is_empty() {
+            let mut next = HashSet::new();
+            for q in frontier {
+                for p in neighbours(&q) {
+                    if unexplored.contains(&p) {
+                        next.insert(p);
+                    }
+                } 
+                unexplored.remove(&q);
+            }
+            frontier = next;
+        }
+        count += 1;
+    }
+    count
+}
+
+fn main() {
+    let testkey = "flqrgnkx";
+    let key = "ugkiagan";
+    let h = get_map(key);
+    println!("{}", h.len());
+    let c = count_regions(&h);
+    println!("{}", c)
 }
