@@ -1,5 +1,6 @@
 use std::iter::Iterator;
 
+#[derive(Clone, Copy)]
 struct Gen {
     val : u64,
     factor : u64
@@ -25,21 +26,13 @@ fn main() {
     let gen_b = Gen::new(190, 48271);
     let test_gen_a = Gen::new(65, 16807);
     let test_gen_b = Gen::new(8921, 48271);
-    let mut count = 0;
-    for (i,j) in gen_a.zip(gen_b).take(40000000) {
-        if i & 0xffff == j & 0xffff {
-            count += 1;
-        }
-    }
+    let count = gen_a.zip(gen_b).take(40000000)
+                     .filter(|&(i,j)| i & 0xffff == j & 0xffff).count();
     println!("{}", count);
-    let mut count2 = 0;
     let gen_a = Gen::new(516, 16807);
     let gen_b = Gen::new(190, 48271);
-    for (i,j) in gen_a.filter(|&x| x % 4 == 0)
-                      .zip(gen_b.filter(|&x| x % 8 == 0)).take(5000000) {
-        if i & 0xffff == j & 0xffff {
-            count2 += 1;
-        }
-    }
+    let count2 = gen_a.filter(|&x| x % 4 == 0)
+                      .zip(gen_b.filter(|&x| x % 8 == 0)).take(5000000)
+                      .filter(|&(i,j)| i & 0xffff == j & 0xffff).count();
     println!("{}", count2);
 }
