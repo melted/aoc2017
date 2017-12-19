@@ -68,10 +68,9 @@ impl Machine {
                     return false;
                 },
             Rcv(Reg(r)) =>
-                if let Some(v) = self.in_queue.borrow_mut().pop_back() {
-                    self.regs[r] = v;
-                } else {
-                    return true;
+                match self.in_queue.borrow_mut().pop_back() {
+                    Some(v) => self.regs[r] = v,
+                    None    => return true
                 },
             _ => panic!("Bad instruction")
         }
@@ -136,14 +135,15 @@ fn execute_tandem(m1 : &mut Machine, m2 : &mut Machine) -> i64 {
     m2.send_counter
 }
 
+
 fn main() {
     let v = load_data();
-    let mut m = Machine::new(&v, Rc::new(RefCell::new(VecDeque::new())),
-                             Rc::new(RefCell::new(VecDeque::new())));
+    let new_qr = || Rc::new(RefCell::new(VecDeque::new()));
+    let mut m = Machine::new(&v, new_qr(), new_qr());
     let res1 = m.execute_until_rcv();
     println!("{:?}", res1);
-    let q1 = Rc::new(RefCell::new(VecDeque::new()));
-    let q2 = Rc::new(RefCell::new(VecDeque::new()));
+    let q1 = new_qr();
+    let q2 = new_qr();
     let mut m1 = Machine::new(&v, Rc::clone(&q1), Rc::clone(&q2));
     let mut m2 = Machine::new(&v, Rc::clone(&q2), Rc::clone(&q1));
     m2.regs[15] = 1;
