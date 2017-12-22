@@ -89,7 +89,7 @@ fn paste_together(v : &Vec<Vec<Pattern>>) -> Pattern {
     let size = v.len()*v[0][0].len();
     let l = v[0][0].len();
     let mut out = Vec::new();
-    for i in 0..size {
+    for _ in 0..size {
         out.push(vec![0; size]);
     }
     for y in 0..v.len() {
@@ -111,8 +111,7 @@ fn step(p : &Pattern, rules : &HashMap<Pattern, Pattern>) -> Pattern {
     let mut parts = break_down(p, chunk_size);
     for i in parts.iter_mut() {
         for j in i.iter_mut() {
-            let nj = rules[j].clone();
-            *j = nj;
+            *j = rules[j].clone();
         }
     }
     paste_together(&parts)
