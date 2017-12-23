@@ -1,0 +1,28 @@
+b <- 81
+c <- b
+b = b * 100 (b=8100)
+b = b + 100000 (b=108100)
+c <- b (c=108100)
+c = c + 17000 (c=125100)
+do
+    f <- 1
+    d <- 2
+    do
+        e <- 2
+        do
+            g <- d * e - b
+            if g == 0 
+                f <- 0
+            e++
+            g <- e - b
+        while g != 0
+        d++
+        g <- d - b
+    while g != 0
+    if f == 0
+        h++
+    g <- b - c
+    b = b + 17
+while g != 0 
+
+
